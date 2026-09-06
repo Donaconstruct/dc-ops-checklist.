@@ -8,41 +8,37 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* Intentionally always-dark, amber-accented theme — distinct on sight from the
+   light/blue client portal, so staff never mistake which tool they're in. */
 :root{
-  --bg:#EEF1F4; --surface:#FBFCFE; --surface-2:#E8ECF1;
-  --ink:#1A2430; --ink-muted:#5B6B7A; --ink-faint:#8996A4;
-  --line:#D6DEE6; --line-strong:#BFCAD4;
-  --accent:#1761A0; --accent-ink:#F3F8FC; --accent-soft:#DCEAF4;
-  --timber:#0B3B66; --timber-soft:#DCE6EF;
-  --good:#2F7A46; --good-soft:#DEEBDF;
-  --warn:#9C6A0A; --warn-soft:#F1E6CC;
-  --critical:#B23A2E; --critical-soft:#F3DFD9;
-  --shadow: 0 1px 2px rgba(20,30,40,0.08), 0 6px 20px -8px rgba(20,30,40,0.20);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#10151C; --surface:#171E27; --surface-2:#1D2530;
-    --ink:#E8EEF3; --ink-muted:#9FAEBC; --ink-faint:#6C7A89;
-    --line:#2A3542; --line-strong:#384453;
-    --accent:#6FB3E0; --accent-ink:#0A1A24; --accent-soft:#1E3646;
-    --timber:#5A8FC7; --timber-soft:#16283A;
-    --good:#68C084; --good-soft:#1F3226;
-    --warn:#E4B457; --warn-soft:#382D14;
-    --critical:#E58579; --critical-soft:#3A211D;
-    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 8px 24px -8px rgba(0,0,0,0.55);
-  }
+  --bg:#E9EEFC; --surface:#FFFFFF; --surface-2:#DEE6F9;
+  --ink:#1B2A4A; --ink-muted:#54628A; --ink-faint:#8391B5;
+  --line:#C9D5F2; --line-strong:#AFC0E8;
+  --accent:#3854D6; --accent-ink:#F4F7FF; --accent-soft:#E1E7FB;
+  --timber:#1B2A6B; --timber-soft:#DCE2F7;
+  --good:#2F8F52; --good-soft:#E1F3E6;
+  --warn:#B4790C; --warn-soft:#FBEBD1;
+  --critical:#C43C2E; --critical-soft:#FBE1DD;
+  --shadow: 0 1px 2px rgba(30,45,90,0.08), 0 8px 20px -8px rgba(30,45,90,0.18);
+  --focus: 0 0 0 3px rgba(56,84,214,0.35);
 }
 *{box-sizing:border-box;}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.5;}
-.wrap{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
-.masthead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
-.masthead h1{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:0.02em;font-size:22px;margin:0 0 2px;color:var(--timber);}
-.masthead .sub{color:var(--ink-muted);font-size:12.5px;}
-.badge-internal{background:var(--warn-soft);color:var(--warn);font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;}
+.wrap{max-width:940px;margin:0 auto;padding:20px 16px 60px;}
+
+.hazard-stripe{height:6px;margin:0 0 18px;border-radius:3px;
+  background: repeating-linear-gradient(135deg, var(--accent), var(--accent) 10px, var(--bg) 10px, var(--bg) 20px);
+  opacity:0.85;}
+.masthead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:12px;}
+.mark{width:44px;height:auto;flex-shrink:0;}
+.brand h1{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:0.02em;font-size:20px;margin:0 0 1px;color:var(--ink);line-height:1.1;}
+.brand .sub{color:var(--ink-muted);font-size:12px;}
+.badge-internal{background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;height:fit-content;}
 
 .jobtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
 .jobtab{background:var(--surface);border:1px solid var(--line);color:var(--ink-muted);font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;}
-.jobtab.active{background:var(--timber);color:#fff;border-color:var(--timber);}
+.jobtab.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
 .jobtab-add{background:transparent;border:1px dashed var(--line-strong);color:var(--ink-faint);}
 
 .jobpanel{display:none;}
@@ -52,21 +48,28 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',
 .jobheader .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px;}
 .jobheader label{display:block;font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:3px;}
 .jobheader input, .jobheader select{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--ink);}
+.jobheader .type-pill{display:inline-block;margin-top:4px;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--timber-soft);color:var(--timber);text-transform:uppercase;letter-spacing:0.03em;}
 .overallbar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:4px;}
 .overallfill{height:100%;background:var(--good);width:0%;transition:width .3s;}
 .overallpct{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--good);}
 
 .stage{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow);}
+.stage.stage-complete{border-color:var(--good);}
 .stage-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;}
 .stage-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);background:var(--surface-2);width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stage.stage-complete .stage-num{background:var(--good-soft);color:var(--good);}
 .stage-title{font-weight:600;font-size:14px;flex:1;}
 .stage-progress{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted);white-space:nowrap;}
 .stage-chevron{color:var(--ink-faint);transition:transform .2s;font-size:12px;}
 .stage.open .stage-chevron{transform:rotate(90deg);}
 .stage-bar{height:4px;background:var(--surface-2);}
-.stage-bar-fill{height:100%;background:var(--accent);width:0%;transition:width .3s;}
+.stage-bar-fill{height:100%;background:var(--timber);width:0%;transition:width .3s;}
+.stage.stage-complete .stage-bar-fill{background:var(--good);}
 .stage-body{display:none;padding:4px 14px 12px;}
 .stage.open .stage-body{display:block;}
+
+.portal-reminder{display:flex;align-items:center;gap:8px;background:var(--good-soft);color:var(--good);font-size:12px;font-weight:600;padding:8px 14px;border-top:1px solid var(--line);}
+.portal-reminder a{color:var(--good);text-decoration:underline;}
 
 .task{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line);}
 .task:first-child{border-top:none;}
@@ -83,6 +86,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',
 .addtask-row button{background:var(--accent-soft);color:var(--accent);border:none;border-radius:6px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;}
 
 .oc-flag{background:var(--accent-soft);color:var(--accent);font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:6px;white-space:nowrap;}
+.asb-flag{background:var(--warn-soft);color:var(--warn);font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:6px;white-space:nowrap;}
 
 .footer-note{color:var(--ink-faint);font-size:11.5px;margin-top:20px;text-align:center;}
 .savepill{position:fixed;bottom:14px;right:14px;background:var(--good);color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);}
@@ -95,24 +99,30 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',
 <div class="wrap">
 
   <div class="masthead">
-    <div>
-      <h1>Build checklist — internal ops</h1>
-      <div class="sub">Dona Construction · task-level tracker · cloud-synced · not shared with clients</div>
+    <div class="brand">
+      <img class="mark" src="data:image/png;base64,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" alt="Dona Construction">
+      <div>
+        <h1>Build Checklist</h1>
+        <div class="sub">Dona Construction · internal ops · task-level tracker · cloud-synced</div>
+      </div>
     </div>
     <div class="badge-internal">Staff only</div>
   </div>
+  <div class="hazard-stripe"></div>
 
   <div class="jobtabs" id="jobtabs"></div>
 
   <div id="jobpanels"><div class="loading">Loading...</div></div>
 
-  <div class="footer-note">This tracker is separate from the client-facing project portal. Only completed high-level stages should be reflected there — no task-level detail is shared with clients.</div>
+  <div class="footer-note">This tracker is separate from the client-facing project portal. When a stage here is fully ticked, update that stage on the portal too — no task-level detail should be shared with clients.</div>
 </div>
 
 <div class="savepill" id="savepill">Saved</div>
 
 <script>
-const DEFAULT_TEMPLATE = [
+// ---- Stage templates, matched to the client-portal stage names (see dona-construction-portal-ops skill) ----
+
+const NEW_BUILD_TEMPLATE = [
   {title:"01 · Contract & deposit", tasks:[
     "Finalise construction contract with client",
     "Deposit invoiced and received",
@@ -217,9 +227,83 @@ const DEFAULT_TEMPLATE = [
   ]}
 ];
 
+const RENOVATION_TEMPLATE = [
+  {title:"01 · Contract & deposit", tasks:[
+    "Finalise construction contract with client",
+    "Deposit invoiced and received",
+    "Arrange builder's insurance & home warranty insurance",
+    "Confirm scope of works matches signed contract"
+  ]},
+  {title:"02 · Approvals (DA/CDC)", tasks:[
+    "Confirm approval pathway — exempt / Complying Development / full DA",
+    "Structural engineering drawings (if load-bearing changes)",
+    "DA or CDC lodged (if required)",
+    "BASIX / energy compliance report (if required)",
+    "Approval issued",
+    "Confirm whether an Occupation Certificate or Compliance Certificate applies to this scope"
+  ]},
+  {title:"03 · Demolition & strip-out", tasks:[
+    "Asbestos survey completed (pre-1990 dwellings)",
+    "Asbestos removal by licensed contractor (if identified)",
+    "Services isolated — power, water, gas confirmed off/capped",
+    "Protection of existing finishes & neighbouring property in place",
+    "Skip bin / waste removal arranged",
+    "Partial demolition / strip-out completed",
+    "Site clean after strip-out"
+  ]},
+  {title:"04 · Structural & framing", tasks:[
+    "Engineer sign-off for any structural/load-bearing changes",
+    "Temporary propping/shoring installed (if required)",
+    "New framing erected",
+    "Structural inspection (certifier) — PASS",
+    "Windows/doors ordered (if scope includes)"
+  ]},
+  {title:"05 · Rough-in (elec/plumb)", tasks:[
+    "Electrical rough-in",
+    "Plumbing rough-in (water, gas, drainage)",
+    "HVAC ducting/rough-in (if applicable)",
+    "Insulation installed (affected areas)",
+    "Plasterboard/gyprock installed",
+    "Rough-in inspection (certifier, if required) — PASS"
+  ]},
+  {title:"06 · Fixing", tasks:[
+    "Internal door frames & architraves",
+    "Skirting boards installed",
+    "Kitchen & wardrobe cabinetry install",
+    "Tiling (bathrooms, kitchen, laundry)",
+    "Bathroom waterproofing certified",
+    "Plumbing fixtures installed (taps, toilets, hot water)",
+    "Electrical fixtures installed (switches, lights, power points)",
+    "Painting — internal & external (affected areas)",
+    "Flooring installed (timber/carpet/vinyl)",
+    "External works — paths, fencing, landscaping (if in scope)"
+  ]},
+  {title:"07 · Practical completion", tasks:[
+    "Final electrical safety certificate (CCEW) obtained",
+    "Final plumbing/drainage compliance certificate obtained",
+    "Smoke alarm compliance certificate",
+    "Structural engineer final certification (if required)",
+    "Compliance Certificate or Occupation Certificate lodged (per approval pathway confirmed in stage 02)",
+    "Defect inspection/snagging list completed",
+    "Defects rectified",
+    "Builder's clean"
+  ]},
+  {title:"08 · Handover", tasks:[
+    "Client walkthrough completed",
+    "Handover documentation (compliance certs, warranties, manuals)",
+    "Final invoice/progress claim reconciled"
+  ]},
+  {title:"09 · Defects period", tasks:[
+    "Defects liability period tracked",
+    "6-month maintenance inspection",
+    "Close out council/certifier files",
+    "Insurance/warranty registration lodged"
+  ]}
+];
+
 const PRELOAD_JOBS = [
-  {id: "33-beechwood", address: "33 Beechwood"},
-  {id: "45-glen-logan-rd-bossley-park", address: "45 Glen Logan Rd, Bossley Park"}
+  {id: "33-beechwood", address: "33 Beechwood", type: "Duplex"},
+  {id: "45-glen-logan-rd-bossley-park", address: "45 Glen Logan Rd, Bossley Park", type: "Duplex"}
 ];
 
 let jobs = {};
@@ -229,17 +313,22 @@ let taskCounter = 0;
 
 function nextTaskId(){ taskCounter += 1; return 'custom-' + Date.now().toString(36) + '-' + taskCounter; }
 
-function buildDefaultStages(){
-  return DEFAULT_TEMPLATE.map((s, si) => ({
+function templateForType(type){
+  return type === 'Renovation' ? RENOVATION_TEMPLATE : NEW_BUILD_TEMPLATE;
+}
+
+function buildStagesFromTemplate(template){
+  return template.map((s, si) => ({
     title: s.title,
     tasks: s.tasks.map((t, ti) => ({ id: 's'+si+'t'+ti, text: t, done: false, note: '' }))
   }));
 }
 
-function newJobData(address){
+function newJobData(address, type){
+  type = type || "Duplex";
   return {
-    meta: { address: address || "", jobNo: "", client: "", supervisor: "", type: "Duplex" },
-    stages: buildDefaultStages()
+    meta: { address: address || "", jobNo: "", client: "", supervisor: "", type: type, portalUrl: "" },
+    stages: buildStagesFromTemplate(templateForType(type))
   };
 }
 
@@ -266,7 +355,7 @@ async function loadAll(){
     if(!ids || ids.length === 0){
       ids = PRELOAD_JOBS.map(j => j.id);
       for(const pj of PRELOAD_JOBS){
-        jobs[pj.id] = newJobData(pj.address);
+        jobs[pj.id] = newJobData(pj.address, pj.type);
         await apiSaveJob(pj.id, jobs[pj.id]);
       }
       await apiSaveJobsIndex(ids);
@@ -274,6 +363,8 @@ async function loadAll(){
       for(const id of ids){
         const data = await apiGetJob(id);
         jobs[id] = data || newJobData();
+        if(!jobs[id].meta.type) jobs[id].meta.type = "Duplex";
+        if(jobs[id].meta.portalUrl === undefined) jobs[id].meta.portalUrl = "";
       }
     }
     jobOrder = ids;
@@ -307,8 +398,9 @@ function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-
 async function addJob(){
   const address = prompt("New job — street address:");
   if(!address) return;
+  const type = confirm("Click OK for a Renovation, or Cancel for a New Build / Duplex.") ? "Renovation" : "Duplex";
   const id = slug(address) + '-' + Date.now().toString(36).slice(-4);
-  jobs[id] = newJobData(address);
+  jobs[id] = newJobData(address, type);
   jobOrder.push(id);
   activeJob = id;
   await apiSaveJob(id, jobs[id]);
@@ -362,11 +454,14 @@ function buildJobHeader(id){
       <div><label>Supervisor</label><input data-field="supervisor" value="${escapeAttr(meta.supervisor)}"></div>
       <div><label>Type</label>
         <select data-field="type">
-          <option ${meta.type==='Duplex'?'selected':''}>Duplex</option>
-          <option ${meta.type==='House'?'selected':''}>House</option>
-          <option ${meta.type==='Renovation'?'selected':''}>Renovation</option>
+          <option value="Duplex" ${meta.type==='Duplex'?'selected':''}>Duplex (new build)</option>
+          <option value="House" ${meta.type==='House'?'selected':''}>House (new build)</option>
+          <option value="Renovation" ${meta.type==='Renovation'?'selected':''}>Renovation</option>
         </select>
       </div>
+    </div>
+    <div class="grid" style="margin-top:-4px;">
+      <div style="grid-column: 1 / -1;"><label>Client portal URL (optional — powers the completion reminder below)</label><input data-field="portalUrl" placeholder="https://claude.ai/... or claude.site/..." value="${escapeAttr(meta.portalUrl || '')}"></div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
       <div class="overallbar" style="flex:1;"><div class="overallfill" id="ovfill-${id}"></div></div>
@@ -375,7 +470,12 @@ function buildJobHeader(id){
   `;
   wrap.querySelectorAll('input,select').forEach(el=>{
     el.addEventListener('change', async ()=>{
-      jobs[id].meta[el.dataset.field] = el.value;
+      const field = el.dataset.field;
+      if(field === 'type' && el.value !== jobs[id].meta.type){
+        const proceed = confirm("Changing job type does not reload the stage list (so your existing ticks aren't lost). Only do this to correct a mistake made when the job was first created. Continue?");
+        if(!proceed){ el.value = jobs[id].meta.type; return; }
+      }
+      jobs[id].meta[field] = el.value;
       await persistJob(id);
       render();
     });
@@ -402,9 +502,15 @@ function buildStage(jobId, si, stage){
   bar.innerHTML = `<div class="stage-bar-fill" id="sb-${jobId}-${si}"></div>`;
   el.appendChild(bar);
 
+  const reminder = document.createElement('div');
+  reminder.className = 'portal-reminder';
+  reminder.id = `reminder-${jobId}-${si}`;
+  reminder.style.display = 'none';
+  el.appendChild(reminder);
+
   const body = document.createElement('div');
   body.className = 'stage-body';
-  stage.tasks.forEach((task, ti)=>{
+  stage.tasks.forEach((task)=>{
     body.appendChild(buildTaskRow(jobId, si, task));
   });
 
@@ -433,13 +539,14 @@ function buildStage(jobId, si, stage){
 }
 
 function buildTaskRow(jobId, si, task){
-  const isOC = /OC|Occupation Certificate|certificate|PCA/i.test(task.text);
+  const isOC = /OC|Occupation Certificate|Compliance Certificate|certificate|PCA/i.test(task.text);
+  const isAsbestos = /asbestos/i.test(task.text);
   const row = document.createElement('div');
   row.className = 'task' + (task.done ? ' done' : '');
   row.innerHTML = `
     <input type="checkbox" ${task.done?'checked':''}>
     <div class="task-col">
-      <span class="tlabel">${escapeHtml(task.text)}${isOC ? '<span class="oc-flag">OC</span>' : ''}</span>
+      <span class="tlabel">${escapeHtml(task.text)}${isAsbestos ? '<span class="asb-flag">ASBESTOS</span>' : (isOC ? '<span class="oc-flag">OC</span>' : '')}</span>
       <input class="tnote" placeholder="Note (date, contact, ref no...)" value="${escapeAttr(task.note)}">
     </div>
     <button type="button" class="tdel" title="Remove task">&times;</button>
@@ -472,14 +579,30 @@ function buildTaskRow(jobId, si, task){
 function updateAllProgress(){
   jobOrder.forEach(jobId=>{
     let totalDone=0, totalAll=0;
+    const portalUrl = jobs[jobId].meta.portalUrl;
     jobs[jobId].stages.forEach((stage, si)=>{
       let done=0;
       stage.tasks.forEach(t=>{ if(t.done) done++; });
       totalDone += done; totalAll += stage.tasks.length;
       const spEl = document.getElementById(`sp-${jobId}-${si}`);
       const sbEl = document.getElementById(`sb-${jobId}-${si}`);
+      const stageEl = spEl ? spEl.closest('.stage') : null;
+      const reminderEl = document.getElementById(`reminder-${jobId}-${si}`);
       if(spEl) spEl.textContent = `${done}/${stage.tasks.length}`;
       if(sbEl) sbEl.style.width = (stage.tasks.length ? done/stage.tasks.length*100 : 0)+'%';
+      const isComplete = stage.tasks.length > 0 && done === stage.tasks.length;
+      if(stageEl) stageEl.classList.toggle('stage-complete', isComplete);
+      if(reminderEl){
+        if(isComplete){
+          reminderEl.style.display = 'flex';
+          const stageName = stage.title.replace(/^\d+\s*·\s*/,'');
+          reminderEl.innerHTML = portalUrl
+            ? `✓ Stage complete — <a href="${escapeAttr(portalUrl)}" target="_blank" rel="noopener">update "${escapeHtml(stageName)}" on the client portal</a>`
+            : `✓ Stage complete — remember to update "${escapeHtml(stageName)}" on the client portal`;
+        } else {
+          reminderEl.style.display = 'none';
+        }
+      }
     });
     const pct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
     const ovf = document.getElementById('ovfill-'+jobId);
