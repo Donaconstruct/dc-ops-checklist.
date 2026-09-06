@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dona Construction — Internal Build Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F4; --surface:#FBFCFE; --surface-2:#E8ECF1;
+  --ink:#1A2430; --ink-muted:#5B6B7A; --ink-faint:#8996A4;
+  --line:#D6DEE6; --line-strong:#BFCAD4;
+  --accent:#1761A0; --accent-ink:#F3F8FC; --accent-soft:#DCEAF4;
+  --timber:#0B3B66; --timber-soft:#DCE6EF;
+  --good:#2F7A46; --good-soft:#DEEBDF;
+  --warn:#9C6A0A; --warn-soft:#F1E6CC;
+  --critical:#B23A2E; --critical-soft:#F3DFD9;
+  --shadow: 0 1px 2px rgba(20,30,40,0.08), 0 6px 20px -8px rgba(20,30,40,0.20);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151C; --surface:#171E27; --surface-2:#1D2530;
+    --ink:#E8EEF3; --ink-muted:#9FAEBC; --ink-faint:#6C7A89;
+    --line:#2A3542; --line-strong:#384453;
+    --accent:#6FB3E0; --accent-ink:#0A1A24; --accent-soft:#1E3646;
+    --timber:#5A8FC7; --timber-soft:#16283A;
+    --good:#68C084; --good-soft:#1F3226;
+    --warn:#E4B457; --warn-soft:#382D14;
+    --critical:#E58579; --critical-soft:#3A211D;
+    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 8px 24px -8px rgba(0,0,0,0.55);
+  }
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.5;}
+.wrap{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
+.masthead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.masthead h1{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:0.02em;font-size:22px;margin:0 0 2px;color:var(--timber);}
+.masthead .sub{color:var(--ink-muted);font-size:12.5px;}
+.badge-internal{background:var(--warn-soft);color:var(--warn);font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;}
+
+.jobtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.jobtab{background:var(--surface);border:1px solid var(--line);color:var(--ink-muted);font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;}
+.jobtab.active{background:var(--timber);color:#fff;border-color:var(--timber);}
+.jobtab-add{background:transparent;border:1px dashed var(--line-strong);color:var(--ink-faint);}
+
+.jobpanel{display:none;}
+.jobpanel.active{display:block;}
+
+.jobheader{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow);}
+.jobheader .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px;}
+.jobheader label{display:block;font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:3px;}
+.jobheader input, .jobheader select{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--ink);}
+.overallbar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:4px;}
+.overallfill{height:100%;background:var(--good);width:0%;transition:width .3s;}
+.overallpct{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--good);}
+
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow);}
+.stage-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;}
+.stage-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);background:var(--surface-2);width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stage-title{font-weight:600;font-size:14px;flex:1;}
+.stage-progress{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted);white-space:nowrap;}
+.stage-chevron{color:var(--ink-faint);transition:transform .2s;font-size:12px;}
+.stage.open .stage-chevron{transform:rotate(90deg);}
+.stage-bar{height:4px;background:var(--surface-2);}
+.stage-bar-fill{height:100%;background:var(--accent);width:0%;transition:width .3s;}
+.stage-body{display:none;padding:4px 14px 12px;}
+.stage.open .stage-body{display:block;}
+
+.task{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line);}
+.task:first-child{border-top:none;}
+.task input[type=checkbox]{margin-top:3px;width:16px;height:16px;accent-color:var(--good);flex-shrink:0;cursor:pointer;}
+.task .tlabel{flex:1;font-size:13px;}
+.task.done .tlabel{color:var(--ink-faint);text-decoration:line-through;}
+.task .tnote{width:100%;margin-top:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:4px 6px;font-size:12px;color:var(--ink);font-family:'IBM Plex Sans',sans-serif;}
+.task .tnote::placeholder{color:var(--ink-faint);}
+.task-col{flex:1;min-width:0;}
+.task .tdel{background:none;border:none;color:var(--ink-faint);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;}
+
+.addtask-row{display:flex;gap:8px;padding:10px 0 4px;border-top:1px solid var(--line);margin-top:4px;}
+.addtask-row input{flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;color:var(--ink);font-family:'IBM Plex Sans',sans-serif;}
+.addtask-row button{background:var(--accent-soft);color:var(--accent);border:none;border-radius:6px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;}
+
+.oc-flag{background:var(--accent-soft);color:var(--accent);font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:6px;white-space:nowrap;}
+
+.footer-note{color:var(--ink-faint);font-size:11.5px;margin-top:20px;text-align:center;}
+.savepill{position:fixed;bottom:14px;right:14px;background:var(--good);color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);}
+.savepill.show{opacity:1;}
+.savepill.err{background:var(--critical);}
+.loading{text-align:center;color:var(--ink-faint);padding:40px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1>Build checklist — internal ops</h1>
+      <div class="sub">Dona Construction · task-level tracker · cloud-synced · not shared with clients</div>
+    </div>
+    <div class="badge-internal">Staff only</div>
+  </div>
+
+  <div class="jobtabs" id="jobtabs"></div>
+
+  <div id="jobpanels"><div class="loading">Loading...</div></div>
+
+  <div class="footer-note">This tracker is separate from the client-facing project portal. Only completed high-level stages should be reflected there — no task-level detail is shared with clients.</div>
+</div>
+
+<div class="savepill" id="savepill">Saved</div>
+
+<script>
+const DEFAULT_TEMPLATE = [
+  {title:"01 · Contract & deposit", tasks:[
+    "Finalise construction contract with client",
+    "Deposit invoiced and received",
+    "Arrange builder's insurance & home warranty insurance",
+    "Obtain long service levy, WorkCover registration, council bonds"
+  ]},
+  {title:"02 · DA / CC approval", tasks:[
+    "Site survey & soil test (geotech report)",
+    "Confirm title, easements, zoning, boundary setbacks",
+    "Structural engineering drawings finalised",
+    "DA (Development Application) or CDC lodged",
+    "BASIX / energy compliance report",
+    "Appoint Principal Certifying Authority (PCA)",
+    "Council/certifier approval (CC/CDC issued)"
+  ]},
+  {title:"03 · Site establishment", tasks:[
+    "Site clean-up & demolition (if applicable)",
+    "Set out survey pegs",
+    "Erosion & sediment control installed",
+    "Tree protection installed (if required)",
+    "Dial-before-you-dig checks completed",
+    "Temporary fencing, signage, site toilet, power/water connected",
+    "Traffic management plan lodged (if needed)"
+  ]},
+  {title:"04 · Slab", tasks:[
+    "Excavation & bulk earthworks",
+    "Termite treatment / barrier installed",
+    "Plumbing rough-in (under-slab drainage)",
+    "Electrical conduits under slab",
+    "Steel reinforcement fixed",
+    "Slab/footing inspection (PCA/certifier) — PASS",
+    "Pour concrete slab/footings",
+    "Waterproofing membrane (if applicable)"
+  ]},
+  {title:"05 · Frame", tasks:[
+    "Timber/steel frame delivered",
+    "Wall framing erected",
+    "Roof trusses installed",
+    "Frame inspection (PCA/certifier) — PASS",
+    "Windows/doors ordered"
+  ]},
+  {title:"06 · Lock-up", tasks:[
+    "Roof covering installed (tiles/metal)",
+    "External wall cladding/brickwork",
+    "Windows & external doors installed",
+    "Flashing & weatherproofing",
+    "Insulation installed",
+    "Fascia, gutters, downpipes",
+    "Lock-up inspection (PCA/certifier) — PASS"
+  ]},
+  {title:"07 · Fixing", tasks:[
+    "Electrical rough-in",
+    "Plumbing rough-in (water, gas, drainage)",
+    "HVAC ducting/rough-in",
+    "Plasterboard/gyprock installed",
+    "Internal door frames & architraves",
+    "Skirting boards installed",
+    "Kitchen & wardrobe cabinetry install",
+    "Tiling (bathrooms, kitchen, laundry)",
+    "Bathroom waterproofing certified",
+    "Plumbing fixtures installed (taps, toilets, hot water)",
+    "Electrical fixtures installed (switches, lights, power points)",
+    "Painting — internal & external",
+    "Flooring installed (timber/carpet/vinyl)",
+    "Balustrades, stairs (if applicable)",
+    "Driveway & external concrete paths",
+    "Fencing",
+    "Landscaping & turf",
+    "Letterbox, clothesline",
+    "Stormwater connection final tie-in",
+    "Retaining walls (if required)"
+  ]},
+  {title:"08 · Practical completion", tasks:[
+    "Final electrical safety certificate (CCEW) obtained",
+    "Final plumbing/drainage compliance certificate obtained",
+    "Smoke alarm compliance certificate",
+    "BASIX/energy compliance final certificate",
+    "Fire safety certificate (if applicable)",
+    "Structural engineer final certification (if required)",
+    "Survey / works-as-executed (WAE) plan",
+    "Compile all compliance certificates for PCA submission",
+    "Lodge Application for Occupation Certificate with PCA",
+    "Address PCA queries/defects prior to issue",
+    "Interim OC (if staged occupation needed)",
+    "Final Occupation Certificate issued",
+    "Lodge OC with council (if PCA is private certifier)",
+    "Defect inspection/snagging list completed",
+    "Defects rectified",
+    "Builder's clean"
+  ]},
+  {title:"09 · Handover", tasks:[
+    "Client walkthrough completed",
+    "Handover keys & documentation (OC, warranties, manuals, certificates)",
+    "Final invoice/progress claim reconciled"
+  ]},
+  {title:"10 · Defects period", tasks:[
+    "Defects liability period tracked",
+    "6-month maintenance inspection",
+    "12-month maintenance inspection",
+    "Close out council/certifier files",
+    "Insurance/warranty registration lodged"
+  ]}
+];
+
+const PRELOAD_JOBS = [
+  {id: "33-beechwood", address: "33 Beechwood"},
+  {id: "45-glen-logan-rd-bossley-park", address: "45 Glen Logan Rd, Bossley Park"}
+];
+
+let jobs = {};
+let jobOrder = [];
+let activeJob = null;
+let taskCounter = 0;
+
+function nextTaskId(){ taskCounter += 1; return 'custom-' + Date.now().toString(36) + '-' + taskCounter; }
+
+function buildDefaultStages(){
+  return DEFAULT_TEMPLATE.map((s, si) => ({
+    title: s.title,
+    tasks: s.tasks.map((t, ti) => ({ id: 's'+si+'t'+ti, text: t, done: false, note: '' }))
+  }));
+}
+
+function newJobData(address){
+  return {
+    meta: { address: address || "", jobNo: "", client: "", supervisor: "", type: "Duplex" },
+    stages: buildDefaultStages()
+  };
+}
+
+async function apiGetJobs(){
+  const r = await fetch('/api/jobs');
+  if(!r.ok) throw new Error('jobs fetch failed');
+  return r.json();
+}
+async function apiSaveJobsIndex(ids){
+  await fetch('/api/jobs', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ids}) });
+}
+async function apiGetJob(id){
+  const r = await fetch('/api/job/' + encodeURIComponent(id));
+  if(!r.ok) throw new Error('job fetch failed');
+  return r.json();
+}
+async function apiSaveJob(id, data){
+  await fetch('/api/job/' + encodeURIComponent(id), { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(data) });
+}
+
+async function loadAll(){
+  try{
+    let ids = await apiGetJobs();
+    if(!ids || ids.length === 0){
+      ids = PRELOAD_JOBS.map(j => j.id);
+      for(const pj of PRELOAD_JOBS){
+        jobs[pj.id] = newJobData(pj.address);
+        await apiSaveJob(pj.id, jobs[pj.id]);
+      }
+      await apiSaveJobsIndex(ids);
+    } else {
+      for(const id of ids){
+        const data = await apiGetJob(id);
+        jobs[id] = data || newJobData();
+      }
+    }
+    jobOrder = ids;
+    activeJob = ids[0];
+    render();
+  }catch(e){
+    document.getElementById('jobpanels').innerHTML = '<div class="loading">Could not reach the server. Check the KV binding is set up, then reload.</div>';
+  }
+}
+
+function flashSave(isErr){
+  const p = document.getElementById('savepill');
+  p.textContent = isErr ? 'Save failed' : 'Saved';
+  p.classList.toggle('err', !!isErr);
+  p.classList.add('show');
+  clearTimeout(window._st);
+  window._st = setTimeout(()=>p.classList.remove('show'), 1000);
+}
+
+async function persistJob(id){
+  try{
+    await apiSaveJob(id, jobs[id]);
+    flashSave(false);
+  }catch(e){
+    flashSave(true);
+  }
+}
+
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
+async function addJob(){
+  const address = prompt("New job — street address:");
+  if(!address) return;
+  const id = slug(address) + '-' + Date.now().toString(36).slice(-4);
+  jobs[id] = newJobData(address);
+  jobOrder.push(id);
+  activeJob = id;
+  await apiSaveJob(id, jobs[id]);
+  await apiSaveJobsIndex(jobOrder);
+  render();
+}
+
+function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function render(){
+  const tabsEl = document.getElementById('jobtabs');
+  const panelsEl = document.getElementById('jobpanels');
+  tabsEl.innerHTML = '';
+  panelsEl.innerHTML = '';
+
+  jobOrder.forEach(id=>{
+    const label = (jobs[id].meta && jobs[id].meta.address) || id;
+    const btn = document.createElement('button');
+    btn.className = 'jobtab' + (id===activeJob ? ' active':'');
+    btn.textContent = label;
+    btn.onclick = ()=>{ activeJob = id; render(); };
+    tabsEl.appendChild(btn);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'jobtab jobtab-add';
+  addBtn.textContent = '+ New job';
+  addBtn.onclick = addJob;
+  tabsEl.appendChild(addBtn);
+
+  jobOrder.forEach(id=>{
+    const panel = document.createElement('div');
+    panel.className = 'jobpanel' + (id===activeJob ? ' active':'');
+    panel.appendChild(buildJobHeader(id));
+    jobs[id].stages.forEach((stage, si)=> panel.appendChild(buildStage(id, si, stage)) );
+    panelsEl.appendChild(panel);
+  });
+
+  updateAllProgress();
+}
+
+function buildJobHeader(id){
+  const meta = jobs[id].meta;
+  const wrap = document.createElement('div');
+  wrap.className = 'jobheader';
+  wrap.innerHTML = `
+    <div class="grid">
+      <div><label>Address</label><input data-field="address" value="${escapeAttr(meta.address)}"></div>
+      <div><label>Job no.</label><input data-field="jobNo" placeholder="DC-01xx" value="${escapeAttr(meta.jobNo)}"></div>
+      <div><label>Client</label><input data-field="client" value="${escapeAttr(meta.client)}"></div>
+      <div><label>Supervisor</label><input data-field="supervisor" value="${escapeAttr(meta.supervisor)}"></div>
+      <div><label>Type</label>
+        <select data-field="type">
+          <option ${meta.type==='Duplex'?'selected':''}>Duplex</option>
+          <option ${meta.type==='House'?'selected':''}>House</option>
+          <option ${meta.type==='Renovation'?'selected':''}>Renovation</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <div class="overallbar" style="flex:1;"><div class="overallfill" id="ovfill-${id}"></div></div>
+      <div class="overallpct" id="ovpct-${id}">0%</div>
+    </div>
+  `;
+  wrap.querySelectorAll('input,select').forEach(el=>{
+    el.addEventListener('change', async ()=>{
+      jobs[id].meta[el.dataset.field] = el.value;
+      await persistJob(id);
+      render();
+    });
+  });
+  return wrap;
+}
+
+function buildStage(jobId, si, stage){
+  const el = document.createElement('div');
+  el.className = 'stage';
+  const head = document.createElement('div');
+  head.className = 'stage-head';
+  head.innerHTML = `
+    <div class="stage-num">${si+1}</div>
+    <div class="stage-title">${stage.title.replace(/^\d+\s*·\s*/,'')}</div>
+    <div class="stage-progress" id="sp-${jobId}-${si}">0/${stage.tasks.length}</div>
+    <div class="stage-chevron">&#9656;</div>
+  `;
+  head.onclick = ()=> el.classList.toggle('open');
+  el.appendChild(head);
+
+  const bar = document.createElement('div');
+  bar.className = 'stage-bar';
+  bar.innerHTML = `<div class="stage-bar-fill" id="sb-${jobId}-${si}"></div>`;
+  el.appendChild(bar);
+
+  const body = document.createElement('div');
+  body.className = 'stage-body';
+  stage.tasks.forEach((task, ti)=>{
+    body.appendChild(buildTaskRow(jobId, si, task));
+  });
+
+  const addRow = document.createElement('div');
+  addRow.className = 'addtask-row';
+  addRow.innerHTML = `<input type="text" placeholder="Add a task to this phase...">
+    <button type="button">Add</button>`;
+  const input = addRow.querySelector('input');
+  const addBtn = addRow.querySelector('button');
+  const doAdd = async ()=>{
+    const val = input.value.trim();
+    if(!val) return;
+    const newTask = { id: nextTaskId(), text: val, done: false, note: '' };
+    jobs[jobId].stages[si].tasks.push(newTask);
+    body.insertBefore(buildTaskRow(jobId, si, newTask), addRow);
+    input.value = '';
+    await persistJob(jobId);
+    updateAllProgress();
+  };
+  addBtn.addEventListener('click', doAdd);
+  input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); doAdd(); } });
+  body.appendChild(addRow);
+
+  el.appendChild(body);
+  return el;
+}
+
+function buildTaskRow(jobId, si, task){
+  const isOC = /OC|Occupation Certificate|certificate|PCA/i.test(task.text);
+  const row = document.createElement('div');
+  row.className = 'task' + (task.done ? ' done' : '');
+  row.innerHTML = `
+    <input type="checkbox" ${task.done?'checked':''}>
+    <div class="task-col">
+      <span class="tlabel">${escapeHtml(task.text)}${isOC ? '<span class="oc-flag">OC</span>' : ''}</span>
+      <input class="tnote" placeholder="Note (date, contact, ref no...)" value="${escapeAttr(task.note)}">
+    </div>
+    <button type="button" class="tdel" title="Remove task">&times;</button>
+  `;
+  const cb = row.querySelector('input[type=checkbox]');
+  cb.addEventListener('change', async ()=>{
+    task.done = cb.checked;
+    row.classList.toggle('done', cb.checked);
+    await persistJob(jobId);
+    updateAllProgress();
+  });
+  const ni = row.querySelector('.tnote');
+  ni.addEventListener('change', async ()=>{
+    task.note = ni.value;
+    await persistJob(jobId);
+  });
+  const del = row.querySelector('.tdel');
+  del.addEventListener('click', async ()=>{
+    if(!confirm('Remove this task?')) return;
+    const stage = jobs[jobId].stages[si];
+    const idx = stage.tasks.findIndex(t=>t.id===task.id);
+    if(idx > -1) stage.tasks.splice(idx,1);
+    row.remove();
+    await persistJob(jobId);
+    updateAllProgress();
+  });
+  return row;
+}
+
+function updateAllProgress(){
+  jobOrder.forEach(jobId=>{
+    let totalDone=0, totalAll=0;
+    jobs[jobId].stages.forEach((stage, si)=>{
+      let done=0;
+      stage.tasks.forEach(t=>{ if(t.done) done++; });
+      totalDone += done; totalAll += stage.tasks.length;
+      const spEl = document.getElementById(`sp-${jobId}-${si}`);
+      const sbEl = document.getElementById(`sb-${jobId}-${si}`);
+      if(spEl) spEl.textContent = `${done}/${stage.tasks.length}`;
+      if(sbEl) sbEl.style.width = (stage.tasks.length ? done/stage.tasks.length*100 : 0)+'%';
+    });
+    const pct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
+    const ovf = document.getElementById('ovfill-'+jobId);
+    const ovp = document.getElementById('ovpct-'+jobId);
+    if(ovf) ovf.style.width = pct+'%';
+    if(ovp) ovp.textContent = pct+'%';
+  });
+}
+
+loadAll();
+</script>
+</body>
+</html>
