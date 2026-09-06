@@ -88,7 +88,19 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',
 .oc-flag{background:var(--accent-soft);color:var(--accent);font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:6px;white-space:nowrap;}
 .asb-flag{background:var(--warn-soft);color:var(--warn);font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:6px;white-space:nowrap;}
 
+.modal-overlay{position:fixed;inset:0;background:rgba(20,30,60,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--surface);border-radius:12px;padding:20px;max-width:380px;width:100%;box-shadow:var(--shadow);}
+.modal-box h2{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;font-size:16px;margin:0 0 14px;color:var(--ink);}
+.modal-box label{display:block;font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.03em;margin:10px 0 4px;}
+.modal-box input, .modal-box select{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--ink);}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+.modal-actions button{border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;}
+.modal-cancel{background:var(--surface-2);color:var(--ink-muted);}
+.modal-create{background:var(--accent);color:var(--accent-ink);}
+.modal-hint{font-size:11.5px;color:var(--ink-faint);margin-top:2px;}
 .footer-note{color:var(--ink-faint);font-size:11.5px;margin-top:20px;text-align:center;}
+
 .savepill{position:fixed;bottom:14px;right:14px;background:var(--good);color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);}
 .savepill.show{opacity:1;}
 .savepill.err{background:var(--critical);}
@@ -115,6 +127,25 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',
   <div id="jobpanels"><div class="loading">Loading...</div></div>
 
   <div class="footer-note">This tracker is separate from the client-facing project portal. When a stage here is fully ticked, update that stage on the portal too — no task-level detail should be shared with clients.</div>
+</div>
+
+<div class="modal-overlay hidden" id="newJobModal">
+  <div class="modal-box">
+    <h2>New job</h2>
+    <label>Street address</label>
+    <input type="text" id="njAddress" placeholder="e.g. 12 Example St, Suburb">
+    <label>Job type</label>
+    <select id="njType">
+      <option value="Duplex">New build — Duplex</option>
+      <option value="House">New build — House</option>
+      <option value="Renovation">Renovation</option>
+    </select>
+    <div class="modal-hint" id="njHint">Loads the 10-stage new-build checklist.</div>
+    <div class="modal-actions">
+      <button type="button" class="modal-cancel" id="njCancel">Cancel</button>
+      <button type="button" class="modal-create" id="njCreate">Create job</button>
+    </div>
+  </div>
 </div>
 
 <div class="savepill" id="savepill">Saved</div>
@@ -393,20 +424,39 @@ async function persistJob(id){
   }
 }
 
-function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+function openNewJobModal(){
+  document.getElementById('njAddress').value = '';
+  document.getElementById('njType').value = 'Duplex';
+  updateNjHint();
+  document.getElementById('newJobModal').classList.remove('hidden');
+  document.getElementById('njAddress').focus();
+}
+function closeNewJobModal(){
+  document.getElementById('newJobModal').classList.add('hidden');
+}
+function updateNjHint(){
+  const type = document.getElementById('njType').value;
+  const hint = document.getElementById('njHint');
+  hint.textContent = type === 'Renovation'
+    ? 'Loads the 9-stage renovation checklist (asbestos survey, strip-out, structural sign-off, etc).'
+    : 'Loads the 10-stage new-build checklist (slab, frame, lock-up, OC, etc).';
+}
 
-async function addJob(){
-  const address = prompt("New job — street address:");
-  if(!address) return;
-  const type = confirm("Click OK for a Renovation, or Cancel for a New Build / Duplex.") ? "Renovation" : "Duplex";
+async function createJobFromModal(){
+  const address = document.getElementById('njAddress').value.trim();
+  if(!address){ document.getElementById('njAddress').focus(); return; }
+  const type = document.getElementById('njType').value;
   const id = slug(address) + '-' + Date.now().toString(36).slice(-4);
   jobs[id] = newJobData(address, type);
   jobOrder.push(id);
   activeJob = id;
   await apiSaveJob(id, jobs[id]);
   await apiSaveJobsIndex(jobOrder);
+  closeNewJobModal();
   render();
 }
+
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
 function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
@@ -428,7 +478,7 @@ function render(){
   const addBtn = document.createElement('button');
   addBtn.className = 'jobtab jobtab-add';
   addBtn.textContent = '+ New job';
-  addBtn.onclick = addJob;
+  addBtn.onclick = openNewJobModal;
   tabsEl.appendChild(addBtn);
 
   jobOrder.forEach(id=>{
@@ -613,6 +663,11 @@ function updateAllProgress(){
 }
 
 loadAll();
+
+document.getElementById('njType').addEventListener('change', updateNjHint);
+document.getElementById('njCancel').addEventListener('click', closeNewJobModal);
+document.getElementById('njCreate').addEventListener('click', createJobFromModal);
+document.getElementById('njAddress').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); createJobFromModal(); } });
 </script>
 </body>
 </html>
